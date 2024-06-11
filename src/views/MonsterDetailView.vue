@@ -1,39 +1,58 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// get id from router
+import { useRoute } from "vue-router";
+import { onMounted, ref, type Ref } from "vue";
+import {
+  useMonstersStore,
+  type DetailsMonsterType,
+} from "@/stores/useMonstersStore";
+
+const route = useRoute();
+
+const monstersStore = useMonstersStore();
+const monsterId = route.params.id as string;
+
+const monster: Ref<DetailsMonsterType | null> = ref(null);
+
+onMounted(async () => {
+  monster.value = (await monstersStore.fetchMonster(monsterId)) ?? null;
+});
+</script>
 
 <template>
   <main>
     <!-- About Start -->
-    <div class="container-fluid py-5">
+    <div v-if="monster" class="container-fluid py-5">
       <div class="container">
         <div class="row gx-5">
           <div class="col-lg-5 mb-5 mb-lg-0" style="min-height: 500px">
             <div class="position-relative h-100">
               <img
                 class="position-absolute w-100 h-100 rounded"
-                src="https://botw-compendium.herokuapp.com/api/v3/compendium/entry/stone_talus/image"
+                :src="monster.image"
                 style="object-fit: cover"
+                :alt="monster.name"
               />
             </div>
           </div>
           <div class="col-lg-7">
             <div class="border-start border-5 border-primary ps-5 mb-5">
-              <h6 class="text-primary text-uppercase">Category</h6>
-              <h1 class="display-5 text-uppercase mb-0">Monster's Name</h1>
+              <h6 class="text-primary text-uppercase">
+                {{ monster.category }}
+              </h6>
+              <h1 class="display-5 text-uppercase mb-0">{{ monster.name }}</h1>
             </div>
-            <h4 class="text-body mb-4">Description</h4>
+            <h4 class="text-body mb-4">{{ monster.description }}</h4>
 
             <div class="border-start border-5 border-primary ps-5 mb-5">
               <h6 class="text-primary text-uppercase">DROPS</h6>
               <ul>
-                <li>truc1</li>
-                <li>truc2</li>
-                <li>truc3</li>
+                <li v-for="drop in monster.drops" :key="drop">{{ drop }}</li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- About End -->
   </main>
 </template>
